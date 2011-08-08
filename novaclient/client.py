@@ -23,6 +23,7 @@ if not hasattr(urlparse, 'parse_qsl'):
 
 
 from novaclient import exceptions
+from novaclient import service_catalog
 
 
 _logger = logging.getLogger(__name__)
@@ -134,7 +135,7 @@ class HTTPClient(httplib2.Http):
                 self.version = part
                 break
 
-        if not self.version == "v2.0":  # FIXME(chris): This should be better.
+        if self.version in ("v1.0", "v1.1"):
             headers = {'X-Auth-User': self.user,
                        'X-Auth-Key': self.apikey}
             if self.projectid:
@@ -154,12 +155,9 @@ class HTTPClient(httplib2.Http):
             token_url = urlparse.urljoin(self.auth_url, "tokens")
             resp, body = self.request(token_url, "POST", body=body)
 
-            self.management_url = body["auth"]["serviceCatalog"] \
-                                      ["nova"][0]["publicURL"]
-            self.auth_token = body["auth"]["token"]["id"]
-
-            #TODO(chris): Implement service_catalog
-            self.service_catalog = None
+            self.service_catalog = service_catalog.ServiceCatalog(body)
+            self.auth_token = self.service_catalog.token.id
+            self.management_url = self.service_catalog.nova[0].public_url
 
     def _munge_get_url(self, url):
         """
