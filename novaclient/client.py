@@ -157,7 +157,8 @@ class HTTPClient(httplib2.Http):
 
             self.service_catalog = service_catalog.ServiceCatalog(body)
             self.auth_token = self.service_catalog.token.id
-            self.management_url = self.service_catalog.nova[0].public_url
+            self.management_url = self.service_catalog.url_for('nova',
+                                                               'public')
 
     def _munge_get_url(self, url):
         """

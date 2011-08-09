@@ -90,3 +90,8 @@ class ServiceCatalog(CatalogResource):
         super(ServiceCatalog, self).__init__(resource)
 
         self.token = TokenCatalog(resource["auth"]["token"])
+
+    def url_for(self, catalog_class, url):
+        catalog = getattr(self, catalog_class)
+        if catalog:
+            return getattr(catalog[0], url + "_url")

@@ -24,5 +24,5 @@ class ServiceCatalogTest(utils.TestCase):
         self.assertEqual(sc.nova.__repr__(), "[<NovaCatalog: http://fakeurl>]")
 
         self.assertEqual(sc.token.id, "FAKE_ID")
-        self.assertEqual(sc.nova[0].public_url,
+        self.assertEqual(sc.url_for('nova', 'public'),
             SERVICE_CATALOG['auth']['serviceCatalog']['nova'][0]['publicURL'])
