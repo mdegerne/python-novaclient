@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from setuptools import setup, find_packages
 
 
@@ -10,9 +11,31 @@ requirements = ['httplib2', 'argparse', 'prettytable']
 if sys.version_info < (2, 6):
     requirements.append('simplejson')
 
+TOPDIR = os.path.abspath(os.path.dirname(__file__))
+VFILE  = os.path.join(TOPDIR, 'version.py')
+
+args = filter(lambda x: x[0] != '-', sys.argv)
+command = args[1] if len(args) > 1 else ''
+
+if command == 'sdist':
+    PISTON_VERSION = os.environ['PISTON_VERSION']
+    with file(VFILE, 'w') as f:
+        f.write('''#!/usr/bin/env python\nVERSION = '%s'\n''' % PISTON_VERSION)
+elif command == 'develop':
+    PISTON_VERSION = time.strftime('9999.0.%Y%m%d%H%M%S', time.localtime())
+    with file(VFILE, 'w') as f:
+        f.write('''#!/usr/bin/env python\nVERSION = '%s'\n''' % PISTON_VERSION)
+elif command is None:
+    PISTON_VERSION = '9999999999-You_did_not_set_a_version'
+else:
+    assert os.path.exists(VFILE), 'version.py does not exist, please set PISTON_VERSION (or run make_version.py for dev purposes)'
+    import version as pistonversion
+    PISTON_VERSION = pistonversion.VERSION
+    assert '9999.0' not in PISTON_VERSION, 'Please build this from a source tarball'
+
 setup(
     name = "python-novaclient",
-    version = "2.6.6",
+    version = PISTON_VERSION,
     description = "Client library for OpenStack Nova API",
     long_description = read('README.rst'),
     url = 'https://github.com/rackspace/python-novaclient',
